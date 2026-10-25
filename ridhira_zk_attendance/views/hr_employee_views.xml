@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_employee_form_zk_inherit" model="ir.ui.view">
+        <field name="name">hr.employee.form.zk.inherit</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_zk_logs" type="object" class="oe_stat_button" icon="fa-fingerprint">
+                    <field name="zk_attendance_log_count" widget="statinfo" string="Biometric Logs"/>
+                </button>
+            </xpath>
+
+            <xpath expr="//header" position="inside">
+                <button name="action_open_upload_wizard" string="Enroll on Biometric Device" type="object" class="btn-secondary" icon="fa-upload"/>
+            </xpath>
+
+            <xpath expr="//notebook" position="inside">
+                <page string="Biometric Integration" name="zk_biometric">
+                    <group>
+                        <group string="Biometric Identification">
+                            <field name="zk_user_id" placeholder="e.g., 101 (User ID / PIN on machine)"/>
+                            <field name="barcode" string="Badge ID / RFID Card Number"/>
+                            <field name="pin" string="Terminal PIN Code"/>
+                        </group>
+                    </group>
+                    <separator string="Enrolled Biometric Terminals"/>
+                    <field name="zk_machine_user_ids" readonly="1">
+                        <list string="Devices">
+                            <field name="device_id"/>
+                            <field name="device_user_id"/>
+                            <field name="badge_number"/>
+                            <field name="privilege" widget="badge"/>
+                            <field name="enabled" widget="boolean_toggle"/>
+                            <field name="last_sync"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

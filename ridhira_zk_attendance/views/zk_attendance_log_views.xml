@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List View -->
+    <record id="view_zk_attendance_log_list" model="ir.ui.view">
+        <field name="name">zk.attendance.log.list</field>
+        <field name="model">zk.attendance.log</field>
+        <field name="arch" type="xml">
+            <list string="Raw Biometric Punches"
+                  decoration-success="state == 'processed'"
+                  decoration-warning="state == 'draft'"
+                  decoration-danger="state == 'error'"
+                  decoration-muted="state == 'duplicate'">
+                <header>
+                    <button name="action_process_logs" string="Process Punches" type="object" class="btn-primary"/>
+                    <button name="action_match_employee" string="Match Employees" type="object" class="btn-secondary"/>
+                    <button name="action_mark_duplicate" string="Mark as Duplicate" type="object" class="btn-light"/>
+                </header>
+                <field name="name"/>
+                <field name="punch_time"/>
+                <field name="employee_id"/>
+                <field name="device_user_id"/>
+                <field name="device_id"/>
+                <field name="punch_type" widget="badge"/>
+                <field name="verify_type" widget="badge"/>
+                <field name="source" widget="badge"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'processed'"
+                       decoration-warning="state == 'draft'"
+                       decoration-danger="state == 'error'"
+                       decoration-muted="state == 'duplicate'"/>
+                <field name="attendance_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_zk_attendance_log_form" model="ir.ui.view">
+        <field name="name">zk.attendance.log.form</field>
+        <field name="model">zk.attendance.log</field>
+        <field name="arch" type="xml">
+            <form string="Raw Biometric Punch Log">
+                <header>
+                    <button name="action_process_logs" string="Process to Attendance" type="object" class="oe_highlight btn-primary" invisible="state == 'processed'"/>
+                    <button name="action_reprocess" string="Re-Process" type="object" class="btn-secondary" invisible="state != 'processed'"/>
+                    <button name="action_match_employee" string="Re-Match Employee" type="object" class="btn-light" invisible="employee_id != False"/>
+                    <button name="action_mark_duplicate" string="Mark as Duplicate" type="object" class="btn-light text-muted" invisible="state == 'duplicate'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,processed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Punch Log Reference"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Punch Identification">
+                            <field name="punch_time"/>
+                            <field name="employee_id"/>
+                            <field name="device_user_id"/>
+                            <field name="device_id"/>
+                            <field name="device_sn"/>
+                        </group>
+                        <group string="Classification &amp; Source">
+                            <field name="punch_type"/>
+                            <field name="verify_type"/>
+                            <field name="source"/>
+                            <field name="attendance_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group string="Audit &amp; Diagnostic Details">
+                        <field name="error_message" invisible="not error_message"/>
+                        <field name="raw_data"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_zk_attendance_log_search" model="ir.ui.view">
+        <field name="name">zk.attendance.log.search</field>
+        <field name="model">zk.attendance.log</field>
+        <field name="arch" type="xml">
+            <search string="Search Biometric Logs">
+                <field name="employee_id"/>
+                <field name="device_user_id"/>
+                <field name="device_id"/>
+                <field name="device_sn"/>
+                <filter string="Pending Processing" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Processed" name="processed" domain="[('state', '=', 'processed')]"/>
+                <filter string="Errors / Unmatched" name="error" domain="[('state', '=', 'error')]"/>
+                <filter string="Duplicates" name="duplicate" domain="[('state', '=', 'duplicate')]"/>
+                <separator/>
+                <filter string="Today's Punches" name="today" domain="[('punch_time', '&gt;=', context_today().strftime('%Y-%m-%d 00:00:00')), ('punch_time', '&lt;=', context_today().strftime('%Y-%m-%d 23:59:59'))]"/>
+                <separator/>
+                <filter string="Cloud ADMS" name="source_adms" domain="[('source', '=', 'adms')]"/>
+                <filter string="Direct TCP Pull" name="source_tcp" domain="[('source', '=', 'tcp')]"/>
+                <filter string="REST Webhook" name="source_api" domain="[('source', '=', 'api')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Employee" name="group_by_employee" context="{'group_by': 'employee_id'}"/>
+                    <filter string="Device" name="group_by_device" context="{'group_by': 'device_id'}"/>
+                    <filter string="Punch Type" name="group_by_punch_type" context="{'group_by': 'punch_type'}"/>
+                    <filter string="State" name="group_by_state" context="{'group_by': 'state'}"/>
+                    <filter string="Punch Date" name="group_by_date" context="{'group_by': 'punch_time:day'}"/>
+                    <filter string="Source" name="group_by_source" context="{'group_by': 'source'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Pivot View -->
+    <record id="view_zk_attendance_log_pivot" model="ir.ui.view">
+        <field name="name">zk.attendance.log.pivot</field>
+        <field name="model">zk.attendance.log</field>
+        <field name="arch" type="xml">
+            <pivot string="Biometric Punch Statistics" sample="1">
+                <field name="employee_id" type="row"/>
+                <field name="punch_time" interval="day" type="col"/>
+                <field name="state" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_zk_attendance_log" model="ir.actions.act_window">
+        <field name="name">Raw Biometric Punches</field>
+        <field name="res_model">zk.attendance.log</field>
+        <field name="view_mode">list,form,pivot</field>
+        <field name="search_view_id" ref="view_zk_attendance_log_search"/>
+        <field name="context">{'search_default_today': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No biometric punches recorded yet.
+            </p>
+            <p>
+                Punches pulled via Direct TCP/IP or pushed via Cloud ADMS will appear here with full audit trail history.
+            </p>
+        </field>
+    </record>
+</odoo>

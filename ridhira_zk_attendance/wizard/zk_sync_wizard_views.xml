@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zk_sync_wizard_form" model="ir.ui.view">
+        <field name="name">zk.sync.wizard.form</field>
+        <field name="model">zk.sync.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Synchronize Biometric Terminals">
+                <group>
+                    <field name="operation" widget="radio"/>
+                    <field name="device_ids" widget="many2many_tags" options="{'no_create': True}"
+                           invisible="operation == 'process_pending'"/>
+                    <field name="clear_device_logs" invisible="operation != 'download_attendance'"/>
+                </group>
+                <footer>
+                    <button name="action_execute_sync" string="Run Synchronization" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_zk_sync_wizard" model="ir.actions.act_window">
+        <field name="name">Manual Biometric Sync</field>
+        <field name="res_model">zk.sync.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

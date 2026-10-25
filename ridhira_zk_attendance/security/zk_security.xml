@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Module Category -->
+        <record id="module_category_biometric_device" model="ir.module.category">
+            <field name="name">Biometric Device Integration</field>
+            <field name="description">Manage ZKTeco Biometric Devices, Live ADMS pushes, and Attendance Synchronization</field>
+            <field name="sequence">25</field>
+        </record>
+
+        <!-- User Group -->
+        <record id="group_zk_user" model="res.groups">
+            <field name="name">Biometric User</field>
+            <field name="category_id" ref="module_category_biometric_device"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <!-- Manager Group -->
+        <record id="group_zk_manager" model="res.groups">
+            <field name="name">Biometric Administrator</field>
+            <field name="category_id" ref="module_category_biometric_device"/>
+            <field name="implied_ids" eval="[(4, ref('group_zk_user')), (4, ref('hr_attendance.group_hr_attendance_manager'))]"/>
+            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        </record>
+
+        <!-- Multi-Company Rules -->
+        <record id="zk_machine_comp_rule" model="ir.rule">
+            <field name="name">Biometric Machine Multi-Company</field>
+            <field name="model_id" ref="model_zk_machine"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="zk_machine_user_comp_rule" model="ir.rule">
+            <field name="name">Biometric Machine User Multi-Company</field>
+            <field name="model_id" ref="model_zk_machine_user"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="zk_attendance_log_comp_rule" model="ir.rule">
+            <field name="name">Biometric Raw Punch Log Multi-Company</field>
+            <field name="model_id" ref="model_zk_attendance_log"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+    </data>
+</odoo>

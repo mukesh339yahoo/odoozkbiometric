@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root Submenu under HR Attendance -->
+    <menuitem id="menu_zk_biometric_root"
+              name="Biometric Devices"
+              parent="hr_attendance.menu_hr_attendance_root"
+              sequence="20"
+              groups="ridhira_zk_attendance.group_zk_user"/>
+
+    <!-- Terminals Kanban / List -->
+    <menuitem id="menu_zk_machines"
+              name="Terminals Dashboard"
+              parent="menu_zk_biometric_root"
+              action="action_zk_machine"
+              sequence="10"
+              groups="ridhira_zk_attendance.group_zk_user"/>
+
+    <!-- Raw Punch Logs -->
+    <menuitem id="menu_zk_attendance_logs"
+              name="Raw Punch Logs"
+              parent="menu_zk_biometric_root"
+              action="action_zk_attendance_log"
+              sequence="20"
+              groups="ridhira_zk_attendance.group_zk_user"/>
+
+    <!-- Enrolled Users Mapping -->
+    <menuitem id="menu_zk_machine_users"
+              name="Device Users Mapping"
+              parent="menu_zk_biometric_root"
+              action="action_zk_machine_user"
+              sequence="30"
+              groups="ridhira_zk_attendance.group_zk_user"/>
+
+    <!-- Manual Sync Tool -->
+    <menuitem id="menu_zk_sync_wizard"
+              name="Manual Synchronization"
+              parent="menu_zk_biometric_root"
+              action="action_zk_sync_wizard"
+              sequence="40"
+              groups="ridhira_zk_attendance.group_zk_manager"/>
+
+    <!-- Configuration Settings -->
+    <menuitem id="menu_zk_config_settings"
+              name="Biometric Settings"
+              parent="hr_attendance.menu_hr_attendance_settings"
+              action="action_zk_biometric_config_settings"
+              sequence="90"
+              groups="ridhira_zk_attendance.group_zk_manager"/>
+</odoo>

@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_zk_machine_user,zk.machine.user,model_zk_machine,ridhira_zk_attendance.group_zk_user,1,0,0,0
+access_zk_machine_manager,zk.machine.manager,model_zk_machine,ridhira_zk_attendance.group_zk_manager,1,1,1,1
+access_zk_machine_user_user,zk.machine.user.user,model_zk_machine_user,ridhira_zk_attendance.group_zk_user,1,0,0,0
+access_zk_machine_user_manager,zk.machine.user.manager,model_zk_machine_user,ridhira_zk_attendance.group_zk_manager,1,1,1,1
+access_zk_attendance_log_user,zk.attendance.log.user,model_zk_attendance_log,ridhira_zk_attendance.group_zk_user,1,0,0,0
+access_zk_attendance_log_manager,zk.attendance.log.manager,model_zk_attendance_log,ridhira_zk_attendance.group_zk_manager,1,1,1,1
+access_zk_sync_wizard_manager,zk.sync.wizard.manager,model_zk_sync_wizard,ridhira_zk_attendance.group_zk_manager,1,1,1,1
+access_zk_upload_user_wizard_manager,zk.upload.user.wizard.manager,model_zk_upload_user_wizard,ridhira_zk_attendance.group_zk_manager,1,1,1,1

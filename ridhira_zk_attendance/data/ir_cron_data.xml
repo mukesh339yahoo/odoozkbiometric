@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Cron to Auto-Download Attendance Logs from Direct TCP/UDP Devices -->
+        <record id="ir_cron_sync_zk_devices" model="ir.cron">
+            <field name="name">Biometric Devices: Auto-Download Attendance Logs</field>
+            <field name="model_id" ref="model_zk_machine"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_sync_all_devices()</field>
+            <field name="interval_number">15</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Cron to Process Raw Pending Punch Logs into hr.attendance -->
+        <record id="ir_cron_process_zk_logs" model="ir.cron">
+            <field name="name">Biometric Devices: Process Pending Punch Logs</field>
+            <field name="model_id" ref="model_zk_attendance_log"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_process_pending_logs()</field>
+            <field name="interval_number">10</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Cron to Clean up Old Processed Logs -->
+        <record id="ir_cron_cleanup_zk_logs" model="ir.cron">
+            <field name="name">Biometric Devices: Clean up Old Processed Logs</field>
+            <field name="model_id" ref="model_zk_attendance_log"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_cleanup_old_logs()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

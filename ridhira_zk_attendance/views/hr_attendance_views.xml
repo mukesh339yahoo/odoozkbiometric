@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit Attendance Form View -->
+    <record id="view_attendance_form_zk_inherit" model="ir.ui.view">
+        <field name="name">hr.attendance.form.zk.inherit</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.hr_attendance_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="Biometric Terminal Tracking" invisible="not is_biometric">
+                    <group>
+                        <field name="is_biometric" readonly="1"/>
+                        <field name="zk_device_id" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="zk_checkin_log_id" readonly="1"/>
+                        <field name="zk_checkout_log_id" readonly="1"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Inherit Attendance List View -->
+    <record id="view_attendance_tree_zk_inherit" model="ir.ui.view">
+        <field name="name">hr.attendance.list.zk.inherit</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.view_attendance_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='check_out']" position="after">
+                <field name="zk_device_id" optional="show"/>
+                <field name="is_biometric" widget="boolean_toggle" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

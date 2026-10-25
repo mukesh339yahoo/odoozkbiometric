@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_zk_inherit" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.zk.inherit</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="75"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Biometric Integration" string="Biometric Attendance" name="ridhira_zk_attendance">
+                    <block title="ZKTeco Biometric Devices &amp; Attendance Automation" id="zk_biometric_settings">
+                        <setting id="zk_duplicate_filter_setting" string="Duplicate Punch Filter"
+                                 help="Suppresses accidental multiple scans by the same employee within X minutes.">
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <label for="zk_duplicate_threshold_minutes" string="Filter Threshold (Minutes): "/>
+                                    <field name="zk_duplicate_threshold_minutes" class="oe_inline"/>
+                                </div>
+                            </div>
+                        </setting>
+
+                        <setting id="zk_max_shift_setting" string="Shift Boundary Protection"
+                                 help="Prevents runaway attendances if an employee forgets to clock out. Automatically closes shift after X hours.">
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <label for="zk_max_shift_hours" string="Max Shift Duration (Hours): "/>
+                                    <field name="zk_max_shift_hours" class="oe_inline"/>
+                                </div>
+                            </div>
+                        </setting>
+
+                        <setting id="zk_auto_process_setting" string="Real-Time Log Ingestion"
+                                 help="Immediately creates and matches hr.attendance records upon download or Cloud ADMS push.">
+                            <field name="zk_auto_process_logs"/>
+                        </setting>
+
+                        <setting id="zk_retention_setting" string="Raw Punch Retention"
+                                 help="Automatically prunes raw audit logs older than specified days. Set to 0 to keep permanently.">
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <label for="zk_log_retention_days" string="Retention Period (Days): "/>
+                                    <field name="zk_log_retention_days" class="oe_inline"/>
+                                </div>
+                            </div>
+                        </setting>
+
+                        <setting id="zk_security_token_setting" string="Cloud Webhook Security Token"
+                                 help="Optional secret token for validating incoming JSON punch submissions on /api/biometric/punch.">
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <field name="zk_adms_secret_token" placeholder="Generate or enter a secret alphanumeric token..."/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_zk_biometric_config_settings" model="ir.actions.act_window">
+        <field name="name">Biometric Settings</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module': 'ridhira_zk_attendance'}</field>
+    </record>
+</odoo>

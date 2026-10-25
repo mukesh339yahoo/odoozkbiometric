@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List View -->
+    <record id="view_zk_machine_list" model="ir.ui.view">
+        <field name="name">zk.machine.list</field>
+        <field name="model">zk.machine</field>
+        <field name="arch" type="xml">
+            <list string="Biometric Devices" decoration-success="state == 'online'" decoration-danger="state == 'offline'" decoration-muted="not active">
+                <field name="device_code"/>
+                <field name="name"/>
+                <field name="protocol" widget="badge"/>
+                <field name="device_ip" invisible="protocol == 'adms'"/>
+                <field name="port" invisible="protocol == 'adms'"/>
+                <field name="serial_number"/>
+                <field name="location"/>
+                <field name="direction" widget="badge"/>
+                <field name="last_activity" widget="remaining_days"/>
+                <field name="last_sync_time"/>
+                <field name="user_count"/>
+                <field name="log_count"/>
+                <field name="state" widget="badge" decoration-success="state == 'online'" decoration-danger="state == 'offline'" decoration-info="state == 'draft'"/>
+                <field name="auto_sync" widget="boolean_toggle"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_zk_machine_form" model="ir.ui.view">
+        <field name="name">zk.machine.form</field>
+        <field name="model">zk.machine</field>
+        <field name="arch" type="xml">
+            <form string="Biometric Device">
+                <header>
+                    <button name="action_test_connection" string="Test Connection" type="object" class="oe_highlight btn-primary" icon="fa-bolt"/>
+                    <button name="action_download_attendance" string="Download Punches" type="object" class="btn-success" icon="fa-download" invisible="protocol == 'adms'"/>
+                    <button name="action_download_users" string="Sync Users" type="object" class="btn-secondary" icon="fa-users" invisible="protocol == 'adms'"/>
+                    <button name="action_sync_device_time" string="Sync Clock" type="object" class="btn-light" icon="fa-clock-o"/>
+                    <button name="action_beep" string="Beep Voice" type="object" class="btn-light" icon="fa-volume-up" invisible="protocol == 'adms'"/>
+                    <button name="action_restart_device" string="Restart" type="object" class="btn-light text-warning" icon="fa-refresh" confirm="Are you sure you want to reboot this physical device?"/>
+                    <button name="action_clear_device_logs" string="Clear Device Memory" type="object" class="btn-light text-danger" icon="fa-trash" confirm="WARNING: This will wipe attendance logs stored inside the physical device hardware! Ensure you have already downloaded recent punches. Proceed?"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,online,offline"/>
+                </header>
+                <sheet>
+                    <field name="is_pyzk_available" invisible="1"/>
+                    <!-- Warning if pyzk is missing for direct polling -->
+                    <div class="alert alert-warning mb-3" role="alert" invisible="is_pyzk_available or protocol == 'adms'">
+                        <strong><i class="fa fa-exclamation-triangle"></i> Notice:</strong> The Python <code>pyzk</code> library is not installed on this Odoo server. Direct TCP/UDP polling requires <code>pip install pyzk</code>. You can switch Protocol to <strong>Cloud ADMS Push Server</strong> to operate without pyzk!
+                    </div>
+
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_attendance_logs" type="object" class="oe_stat_button" icon="fa-list-alt">
+                            <field name="log_count" widget="statinfo" string="Raw Punches"/>
+                        </button>
+                        <button name="action_view_machine_users" type="object" class="oe_stat_button" icon="fa-users">
+                            <field name="machine_user_count" widget="statinfo" string="Enrolled Users"/>
+                        </button>
+                    </div>
+
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <widget name="web_ribbon" title="Online" bg_color="text-bg-success" invisible="state != 'online'"/>
+                    <widget name="web_ribbon" title="Offline" bg_color="text-bg-danger" invisible="state != 'offline'"/>
+
+                    <div class="oe_title">
+                        <label for="name" string="Device Label / Name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g., Main Entrance Turnstile"/>
+                        </h1>
+                        <h3>
+                            <field name="device_code"/>
+                        </h3>
+                    </div>
+
+                    <group>
+                        <group string="Connectivity Settings">
+                            <field name="protocol" widget="radio"/>
+                            <field name="device_ip" invisible="protocol == 'adms'" required="protocol in ['tcp', 'udp']"/>
+                            <field name="port" invisible="protocol == 'adms'" required="protocol in ['tcp', 'udp']"/>
+                            <field name="comm_key" invisible="protocol == 'adms'"/>
+                            <field name="timeout" invisible="protocol == 'adms'"/>
+                            <field name="serial_number" required="protocol == 'adms'"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group string="Deployment &amp; Policy">
+                            <field name="direction"/>
+                            <field name="location"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="auto_sync"/>
+                            <field name="clear_logs_after_download" invisible="protocol == 'adms'"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Cloud ADMS Setup" name="adms_setup" invisible="protocol != 'adms'">
+                            <div class="alert alert-info">
+                                <h4><i class="fa fa-cloud-upload"></i> How to configure your ZKTeco / eSSL device for Cloud ADMS Push:</h4>
+                                <ol>
+                                    <li>On your biometric device menu, navigate to <strong>Comm. (Communication) ‣ Cloud Server / ADMS / Web Server</strong>.</li>
+                                    <li>Set <strong>Server Address:</strong> <code><field name="adms_server_url" readonly="1" nolabel="1"/></code></li>
+                                    <li>Set <strong>Server Port:</strong> Your Odoo HTTP(S) port (e.g. <code>80</code>, <code>443</code>, or <code>8069</code>).</li>
+                                    <li>Ensure <strong>Enable Domain Name:</strong> Yes (if using domain name) or No (if using direct server IP).</li>
+                                    <li>Enter your device Serial Number (<code><field name="serial_number" readonly="1" nolabel="1"/></code>) on this screen.</li>
+                                    <li>Save and reboot the machine. It will automatically push punches in real time over HTTP!</li>
+                                </ol>
+                            </div>
+                            <group string="ADMS Remote Command Queue">
+                                <field name="adms_command_queue" placeholder="Queued commands (e.g. REBOOT, CHECK, DATA UPDATE USERINFO)..."/>
+                            </group>
+                        </page>
+
+                        <page string="Hardware Specifications" name="hardware_info">
+                            <group>
+                                <group string="Device Identity">
+                                    <field name="device_model"/>
+                                    <field name="firmware_version"/>
+                                    <field name="platform"/>
+                                    <field name="mac_address"/>
+                                </group>
+                                <group string="Telemetry &amp; Timestamps">
+                                    <field name="last_activity"/>
+                                    <field name="last_sync_time"/>
+                                    <field name="user_count"/>
+                                    <field name="attendance_count"/>
+                                    <field name="fingerprint_count"/>
+                                    <field name="face_count"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <page string="Enrolled Device Users" name="device_users">
+                            <field name="machine_user_ids">
+                                <list string="Users" editable="bottom">
+                                    <field name="device_user_id"/>
+                                    <field name="name"/>
+                                    <field name="employee_id"/>
+                                    <field name="badge_number"/>
+                                    <field name="privilege"/>
+                                    <field name="last_sync"/>
+                                    <button name="action_upload_to_device" string="Upload" type="object" icon="fa-upload" title="Upload user to machine"/>
+                                    <button name="action_delete_from_device" string="Delete" type="object" icon="fa-trash" title="Delete from machine" confirm="Delete user from biometric device?"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <page string="Setup Notes" name="notes">
+                            <field name="notes" placeholder="Add wiring notes, installer details, or static IP subnet info..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Kanban View -->
+    <record id="view_zk_machine_kanban" model="ir.ui.view">
+        <field name="name">zk.machine.kanban</field>
+        <field name="model">zk.machine</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_dashboard" sample="1">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="state"/>
+                <field name="protocol"/>
+                <field name="device_ip"/>
+                <field name="port"/>
+                <field name="serial_number"/>
+                <field name="location"/>
+                <field name="log_count"/>
+                <field name="user_count"/>
+                <field name="last_sync_time"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click p-3 border rounded shadow-sm bg-white mb-2">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <strong class="fs-5 text-primary"><field name="name"/></strong>
+                                <span>
+                                    <span t-if="record.state.raw_value == 'online'" class="badge text-bg-success">Online</span>
+                                    <span t-elif="record.state.raw_value == 'offline'" class="badge text-bg-danger">Offline</span>
+                                    <span t-else="" class="badge text-bg-secondary">New</span>
+                                </span>
+                            </div>
+                            <div class="text-muted small mb-2">
+                                <span class="badge text-bg-light border me-1"><field name="protocol"/></span>
+                                <span t-if="record.location.raw_value"><i class="fa fa-map-marker text-danger"></i> <field name="location"/></span>
+                            </div>
+                            <div class="row g-2 text-center my-2">
+                                <div class="col-6">
+                                    <div class="bg-light p-2 rounded">
+                                        <div class="fs-5 fw-bold text-dark"><field name="log_count"/></div>
+                                        <div class="small text-muted">Total Punches</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="bg-light p-2 rounded">
+                                        <div class="fs-5 fw-bold text-dark"><field name="user_count"/></div>
+                                        <div class="small text-muted">Device Users</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                                <div class="small text-muted">
+                                    <i class="fa fa-clock-o"></i> <field name="last_sync_time" widget="remaining_days"/>
+                                </div>
+                                <div class="btn-group">
+                                    <button name="action_download_attendance" type="object" class="btn btn-sm btn-outline-success" invisible="protocol == 'adms'" title="Download Punches">
+                                        <i class="fa fa-download"></i> Sync
+                                    </button>
+                                    <button name="action_test_connection" type="object" class="btn btn-sm btn-outline-primary" title="Test Connection">
+                                        <i class="fa fa-bolt"></i> Test
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_zk_machine_search" model="ir.ui.view">
+        <field name="name">zk.machine.search</field>
+        <field name="model">zk.machine</field>
+        <field name="arch" type="xml">
+            <search string="Search Biometric Devices">
+                <field name="name"/>
+                <field name="device_ip"/>
+                <field name="serial_number"/>
+                <field name="location"/>
+                <filter string="Online" name="online" domain="[('state', '=', 'online')]"/>
+                <filter string="Offline" name="offline" domain="[('state', '=', 'offline')]"/>
+                <separator/>
+                <filter string="Direct TCP/UDP" name="direct_polling" domain="[('protocol', 'in', ['tcp', 'udp'])]"/>
+                <filter string="Cloud ADMS" name="adms" domain="[('protocol', '=', 'adms')]"/>
+                <separator/>
+                <filter string="Auto-Sync Enabled" name="auto_sync" domain="[('auto_sync', '=', True)]"/>
+                <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="group_by_state" context="{'group_by': 'state'}"/>
+                    <filter string="Protocol" name="group_by_protocol" context="{'group_by': 'protocol'}"/>
+                    <filter string="Company" name="group_by_company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Window Action -->
+    <record id="action_zk_machine" model="ir.actions.act_window">
+        <field name="name">Biometric Terminals</field>
+        <field name="res_model">zk.machine</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="view_zk_machine_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Register your first ZKTeco Biometric Device!
+            </p>
+            <p>
+                Connect biometric fingerprint, face recognition, and RFID card terminals via Direct Network IP or Cloud ADMS Push.
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zk_upload_user_wizard_form" model="ir.ui.view">
+        <field name="name">zk.upload.user.wizard.form</field>
+        <field name="model">zk.upload.user.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Enroll Employees onto Biometric Terminals">
+                <group>
+                    <field name="employee_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                    <field name="device_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                    <field name="privilege"/>
+                </group>
+                <footer>
+                    <button name="action_upload" string="Upload to Terminals" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_zk_upload_user_wizard" model="ir.actions.act_window">
+        <field name="name">Enroll on Biometric Device</field>
+        <field name="res_model">zk.upload.user.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
